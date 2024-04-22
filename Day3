@@ -1,0 +1,9 @@
+//baitap1
+SELECT name FROM CITY
+WHERE population > 120000 AND countrycode = 'USA';
+//baitap2
+SELECT * FROM CITY 
+WHERE countrycode = 'JPN';
+//baitap3
+SELECT city,state FROM STATION;
+//baitap4
