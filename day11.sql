@@ -29,7 +29,7 @@ FROM customer_contracts as c
 INNER JOIN products as p
 ON c.product_id = p.product_id
 GROUP BY customer_id
-HAVING COUNT(DISTINCT p.product_category) = 3;
+HAVING COUNT(DISTINCT p.product_category) = (SELECT COUNT(DISTINCT product_category) FROM products);
 -- bai 5
 SELECT e.employee_id, e.name, COUNT(m.employee_id) AS reports_count, ROUND(AVG(m.age)) AS average_age
 FROM Employees AS e
