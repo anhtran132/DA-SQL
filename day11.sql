@@ -51,3 +51,81 @@ LEFT JOIN page_likes AS p2
 ON p1.page_id = p2.page_id
 WHERE liked_date IS NULL
 ORDER BY page_id;
+-- MID COURSE TEST
+-- bai 1
+SELECT min(replacement_cost) FROM film;
+-- bai 2
+SELECT 
+COUNT(CASE
+	WHEN replacement_cost >= 9.99 AND replacement_cost <= 19.99 THEN 'low' 
+END) 
+FROM film
+-- bai 3
+SELECT f.title, f.length, c.name as category_name FROM film AS f
+INNER JOIN film_category AS fc
+ON f.film_id = fc.film_id
+INNER JOIN category AS c
+ON c.category_id = fc.category_id
+WHERE c.name IN ('Drama', 'Sports')
+ORDER BY  f.length DESC 
+LIMIT 1;
+-- bai 4SELECT c.name as category_name, COUNT(f.title) FROM film AS f
+INNER JOIN film_category AS fc
+ON f.film_id = fc.film_id
+INNER JOIN category AS c
+ON c.category_id = fc.category_id
+GROUP BY c.name
+ORDER BY COUNT(f.title) DESC
+LIMIT 1;SELECT a.first_name || ' ' || a.last_name AS name, COUNT(f.film_id)
+FROM film AS f
+INNER JOIN film_actor AS fa
+ON f.film_id = fa.film_id
+INNER JOIN actor AS a
+ON a.actor_id = fa.actor_id
+GROUP BY name
+ORDER BY COUNT(f.film_id) DESC
+LIMIT 1;
+-- bai 5
+SELECT a.first_name || ' ' || a.last_name AS name, COUNT(f.film_id)
+FROM film AS f
+INNER JOIN film_actor AS fa
+ON f.film_id = fa.film_id
+INNER JOIN actor AS a
+ON a.actor_id = fa.actor_id
+GROUP BY name
+ORDER BY COUNT(f.film_id) DESC
+LIMIT 1;
+-- bai 6
+SELECT COUNT(a.address_id) FROM address AS a
+LEFT JOIN customer AS c
+ON c.address_id = a.address_id
+WHERE c.customer_id IS NULL
+-- bai 7
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
