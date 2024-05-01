@@ -101,6 +101,30 @@ LEFT JOIN customer AS c
 ON c.address_id = a.address_id
 WHERE c.customer_id IS NULL
 -- bai 7
+SELECT city.city, SUM(p.amount) FROM payment AS p
+INNER JOIN customer AS cSELECT city.city, SUM(p.amount) FROM payment AS p
+INNER JOIN customer AS c
+ON p.customer_id= c.customer_id
+INNER JOIN address AS a
+ON a.address_id = c.address_id
+INNER JOIN city AS city 
+ON city.city_id = a.city_id
+GROUP BY city.city
+ORDER BY SUM(p.amount) DESC
+LIMIT 1;
+-- bai 8
+SELECT co.country, city.city, SUM(p.amount) FROM payment AS p
+INNER JOIN customer AS c
+ON p.customer_id= c.customer_id
+INNER JOIN address AS a
+ON a.address_id = c.address_id
+INNER JOIN city AS city 
+ON city.city_id = a.city_id
+INNER JOIN country AS co
+ON co.country_id = city.country_id
+GROUP BY co.country, city.city
+ORDER BY SUM(p.amount) DESC
+LIMIT 1;
 
 
 
