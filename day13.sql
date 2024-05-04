@@ -30,6 +30,14 @@ ON p1.page_id = p2.page_id
 WHERE liked_date IS NULL
 ORDER BY page_id;
 -- bai 5
+SELECT EXTRACT(month FROM t1.event_date) as month, COUNT( DISTINCT t1.user_id) as monthly_active_users FROM 
+(SELECT * FROM user_actions
+WHERE event_type IN ('sign-in', 'like', 'comment') AND EXTRACT(month FROM event_date) = 7) as t1
+INNER JOIN 
+(SELECT * FROM user_actions
+WHERE event_type IN ('sign-in', 'like', 'comment') AND EXTRACT(month FROM event_date) = 6) as t2
+ON t1.user_id = t2.user_id
+GROUP BY EXTRACT(month FROM t1.event_date)
 -- bai 6
 SELECT DATE_FORMAT(trans_date, '%Y-%m') AS month, country, COUNT(state) AS trans_count , 
 (SELECT COUNT(state) FROM Transactions WHERE state = 'approved' AND id = t1.id
