@@ -48,25 +48,18 @@ GROUP BY DATE_FORMAT(trans_date, '%Y-%m'), country ) as approved_total_amount
 FROM Transactions as t1
 GROUP BY month, country;
 -- bai 7
-SELECT s.product_id, year AS first_year,
-quantity, price
-FROM sales AS s
-WHERE year in (SELECT MIN(year) FROM sales 
-WHERE product_id = s.product_id
+WITH min_year AS (SELECT MIN(year) as first_year FROM sales 
 GROUP BY product_id)
+SELECT product_id, year AS first_year, quantity, price FROM sales AS s
+JOIN min_year AS m ON s.year = m.first_year
 -- bai 8 
-SELECT DISTINCT customer_id FROM Customer AS c
-WHERE 
-(SELECT COUNT(customer_id) FROM Customer
-WHERE customer_id = c.customer_id
-GROUP BY customer_id) = (SELECT COUNT(product_key) FROM Product)
+SELECT DISTINCT customer_id FROM customer
+GROUP BY customer_id
+HAVING COUNT(product_key) = (SELECT COUNT(*) FROM product)
 -- bai 9
-SELECT e1.employee_id
-FROM Employees e1
-LEFT JOIN Employees e2
-ON e1.manager_id = e2.employee_id
-WHERE e1.salary < 30000 AND e2.employee_id IS NULL AND e1.manager_id IS NOT NULL
-ORDER BY employee_id;
+SELECT employee_id FROM employees
+WHERE salary < 30000 AND
+manager_id NOT IN (SELECT employee_id FROM employees)
 -- bai 10
 SELECT COUNT(DISTINCT company_id) AS duplicate_companies
 FROM (
@@ -91,12 +84,11 @@ GROUP BY MovieRating.movie_id
 ORDER BY avg(MovieRating.rating) DESC, Movies.title ASC
 LIMIT 1)
 -- bai 12
-WITH cte AS(SELECT requester_id id FROM RequestAccepted
+WITH total_id AS
+(SELECT requester_id As id FROM RequestAccepted
 UNION ALL
-SELECT accepter_id id FROM RequestAccepted)
-SELECT id, count(*) num  
-FROM cte 
-GROUP BY 1 
-ORDER BY 2 DESC 
+SELECT accepter_id FROM RequestAccepted)
+SELECT id, COUNT(id) as num FROM total_id
+GROUP BY id
+ORDER BY COUNT(id) DESC
 LIMIT 1
-
