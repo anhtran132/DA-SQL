@@ -82,3 +82,30 @@ SELECT ordernumber, quantityordered ,avg, stddev, (quantityordered - avg)/stddev
 WHERE abs((quantityordered - avg)/stddev) > 3
 
 -- Sau khi làm sạch dữ liệu, hãy lưu vào bảng mới  tên là SALES_DATASET_RFM_PRJ_CLEAN
+create table SALES_DATASET_RFM_PRJ_CLEAN
+(
+  ordernumber NUMERIC,
+  quantityordered NUMERIC,
+  priceeach        NUMERIC,
+  orderlinenumber  NUMERIC,
+  sales            VARCHAR,
+  orderdate        DATE,
+  status           VARCHAR,
+  productline      NUMERIC,
+  msrp             NUMERIC,
+  productcode      VARCHAR,
+  customername     VARCHAR,
+  phone            VARCHAR,
+  addressline1     VARCHAR,
+  addressline2     VARCHAR,
+  city             VARCHAR,
+  state            VARCHAR,
+  postalcode       VARCHAR,
+  country          VARCHAR,
+  territory        VARCHAR,
+  contactfullname  VARCHAR,
+  dealsize         VARCHAR
+) 
+INSERT INTO sales_dataset_rfm_prj_clean 
+SELECT *
+FROM public.sales_dataset_rfm_prj_clean 
