@@ -60,7 +60,7 @@ SET qtr_id = EXTRACT(quarter FROM orderdate)
 -- Hãy tìm outlier (nếu có) cho cột QUANTITYORDERED và hãy chọn cách xử lý cho bản ghi đó (2 cách) ( Không chạy câu lệnh trước khi bài được review)
 -- Cách 1 : Sử dụng Boxplot
 WITH twt_min_max_values AS (
-SELECT Q1 - 1.5*IQR as min, Q3 - 1.5*IQR as max
+SELECT Q1 - 1.5*IQR as min, Q3 + 1.5*IQR as max
 FROM
 (SELECT 
 percentile_cont(0.25) WITHIN GROUP (ORDER BY quantityordered) as Q1,
@@ -73,8 +73,12 @@ WHERE quantityordered < (SELECT min FROM twt_min_max_values)
 OR quantityordered > (SELECT max FROM twt_min_max_values) 
 
 -- Cách 2  : Sử dụng  Z score
+WITH cte AS (SELECT ordernumber, quantityordered ,
+(SELECT avg(quantityordered) FROM sales_dataset_rfm_prj) as avg,
+(SELECT stddev(quantityordered) FROM sales_dataset_rfm_prj) as stddev
+FROM sales_dataset_rfm_prj)
 
+SELECT ordernumber, quantityordered ,avg, stddev, (quantityordered - avg)/stddev AS zscore FROM cte
+WHERE abs((quantityordered - avg)/stddev) > 3
 
 -- Sau khi làm sạch dữ liệu, hãy lưu vào bảng mới  tên là SALES_DATASET_RFM_PRJ_CLEAN
--- DOING 
-
