@@ -58,6 +58,7 @@ UPDATE sales_dataset_rfm_prj
 SET qtr_id = EXTRACT(quarter FROM orderdate)
 
 -- Hãy tìm outlier (nếu có) cho cột QUANTITYORDERED và hãy chọn cách xử lý cho bản ghi đó (2 cách) ( Không chạy câu lệnh trước khi bài được review)
-
+-- DOING 
 -- Sau khi làm sạch dữ liệu, hãy lưu vào bảng mới  tên là SALES_DATASET_RFM_PRJ_CLEAN
+-- DOING 
 
