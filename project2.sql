@@ -25,3 +25,15 @@ WHERE age = (SELECT min(age) FROM bigquery-public-data.thelook_ecommerce.users)
 SELECT COUNT(age) FROM my-project-2-422915._b9aae6f1946c2ef70383046ee451c3079ccba7f8._b4e6d28e_8cf9_47d0_817f_f50dd4963832_customer_data
 WHERE age = (SELECT max(age) FROM bigquery-public-data.thelook_ecommerce.users)
 -- bai 4
+SELECT * FROM (
+SELECT FORMAT_DATE('%Y-%m', o.created_at) as date, p.id, p.name, 
+SUM(p.cost) as cost, 
+SUM(o.sale_price) as sales,
+SUM(o.sale_price - p.cost) as profit,
+DENSE_RANK() OVER(PARTITION BY 1,2,3 ORDER BY SUM(o.sale_price - p.cost) DESC) as rank_per_month
+FROM bigquery-public-data.thelook_ecommerce.products as p 
+INNER JOIN bigquery-public-data.thelook_ecommerce.order_items as o ON p.id = o.product_id
+GROUP BY 1,2,3
+ORDER BY 1)
+WHERE rank_per_month < 6
+-- bai 5
