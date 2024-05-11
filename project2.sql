@@ -1,3 +1,4 @@
+-- Phan 1
 -- bai 1 : Số lượng khách hàng + số lượng order tăng theo từng tháng của các năm, không có dấu hiệu sụt giảm
 SELECT FORMAT_DATE('%Y-%m', created_at) as date, COUNT(order_id) as total_orde, COUNT(user_id) as total_user FROM bigquery-public-data.thelook_ecommerce.orders 
 WHERE status = 'Shipped' AND FORMAT_DATE('%Y-%m', created_at) BETWEEN '2019-01' AND '2022-04'
@@ -25,15 +26,27 @@ WHERE age = (SELECT min(age) FROM bigquery-public-data.thelook_ecommerce.users)
 SELECT COUNT(age) FROM my-project-2-422915._b9aae6f1946c2ef70383046ee451c3079ccba7f8._b4e6d28e_8cf9_47d0_817f_f50dd4963832_customer_data
 WHERE age = (SELECT max(age) FROM bigquery-public-data.thelook_ecommerce.users)
 -- bai 4
-SELECT * FROM (
-SELECT FORMAT_DATE('%Y-%m', o.created_at) as date, p.id, p.name, 
-SUM(p.cost) as cost, 
-SUM(o.sale_price) as sales,
-SUM(o.sale_price - p.cost) as profit,
-DENSE_RANK() OVER(PARTITION BY 1,2,3 ORDER BY SUM(o.sale_price - p.cost) DESC) as rank_per_month
+SELECT * FROM (WITH cte AS(SELECT FORMAT_DATE('%Y-%m', o.created_at) as date, p.id, p.name, 
+ROUND(SUM(p.cost)) as cost, 
+ROUND(SUM(o.sale_price)) as sales,
+ROUND(SUM(o.sale_price - p.cost)) as profit,
 FROM bigquery-public-data.thelook_ecommerce.products as p 
 INNER JOIN bigquery-public-data.thelook_ecommerce.order_items as o ON p.id = o.product_id
+WHERE o.status = 'Complete'
 GROUP BY 1,2,3
 ORDER BY 1)
+SELECT *,
+DENSE_RANK() OVER(PARTITION BY date ORDER BY profit DESC) as rank_per_month
+FROM cte) 
 WHERE rank_per_month < 6
+ORDER BY date
 -- bai 5
+SELECT FORMAT_DATE('%Y-%m-%d', o.created_at) as date,
+p.category, ROUND(SUM(o.sale_price)) as revenue
+FROM bigquery-public-data.thelook_ecommerce.order_items as o
+INNER JOIN bigquery-public-data.thelook_ecommerce.products as p ON o.product_id = p.id
+WHERE FORMAT_DATE('%Y-%m-%d', o.created_at) BETWEEN '2022-04-15' AND '2022-07-15' AND o.status = 'Complete'
+GROUP BY FORMAT_DATE('%Y-%m-%d', o.created_at), p.category
+ORDER BY 1
+-- Phan 2  
+
