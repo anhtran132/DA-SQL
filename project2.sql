@@ -49,6 +49,7 @@ WHERE FORMAT_DATE('%Y-%m-%d', o.delivered_at) BETWEEN '2022-04-15' AND '2022-07-
 GROUP BY FORMAT_DATE('%Y-%m-%d', o.delivered_at), p.category
 ORDER BY 1
 -- Phan 2  
+-- bai 1
 WITH cte as (SELECT FORMAT_DATE('%Y-%m', o1.delivered_at) as month, 
 FORMAT_DATE('%Y', o1.delivered_at) as year,
 SUM(o2.sale_price) as tpv,
@@ -69,6 +70,49 @@ ROUND(tpv-total_cost,2) as total_profit,
 ROUND(ROUND(tpv-total_cost,2)/total_cost, 2) || '%' as profit_to_cost_ratio 
 FROM cte
 ORDER BY month, year
+-- bai 2
+WITH cte AS 
+(SELECT *
+FROM bigquery-public-data.thelook_ecommerce.order_items
+WHERE delivered_at IS NOT NULL),
+cte2 AS (SELECT 
+user_id,
+sale_price,
+FORMAT_DATE('%Y-%m', first_purchase_date) as cohort_date,
+(EXTRACT(year FROM delivered_at) - EXTRACT(year FROM first_purchase_date))*12
++ (EXTRACT(month FROM delivered_at) - EXTRACT(month FROM first_purchase_date)) + 1 as index
+FROM (SELECT user_id, sale_price,
+MIN(delivered_at) OVER(PARTITION BY user_id) as first_purchase_date,
+delivered_at
+FROM cte)
+), 
+cte3 AS (
+SELECT 
+cohort_date, index, 
+COUNT(DISTINCT user_id) as users,
+SUM(sale_price) as revenue
+FROM cte2
+WHERE cohort_date BETWEEN '2020-09' AND '2020-11' AND index < 5
+GROUP BY cohort_date, index
+ORDER BY cohort_date, index),
+user_cohort AS (
+SELECT 
+cohort_date,
+SUM(case when index = 1 then users else 0 end) as m1,
+SUM(case when index = 2 then users else 0 end) as m2,
+SUM(case when index = 3 then users else 0 end) as m3,
+SUM(case when index = 4 then users else 0 end) as m4,
+FROM cte3
+GROUP BY cohort_date
+)
+SELECT 
+cohort_date,
+ROUND(100.00 *m1/m1) || '%' as m1,
+ROUND(100.00 *m2/m1) || '%' as m2,
+ROUND(100.00 *m3/m1) || '%' as m3,
+ROUND(100.00 *m4/m1) || '%' as m4
+FROM user_cohort
+
 
 
 
