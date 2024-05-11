@@ -26,7 +26,7 @@ WHERE age = (SELECT min(age) FROM bigquery-public-data.thelook_ecommerce.users)
 SELECT COUNT(age) FROM my-project-2-422915._b9aae6f1946c2ef70383046ee451c3079ccba7f8._b4e6d28e_8cf9_47d0_817f_f50dd4963832_customer_data
 WHERE age = (SELECT max(age) FROM bigquery-public-data.thelook_ecommerce.users)
 -- bai 4
-SELECT * FROM (WITH cte AS(SELECT FORMAT_DATE('%Y-%m', o.created_at) as date, p.id, p.name, 
+SELECT * FROM (WITH cte AS(SELECT FORMAT_DATE('%Y-%m', o.delivered_at) as date, p.id, p.name, 
 ROUND(SUM(p.cost)) as cost, 
 ROUND(SUM(o.sale_price)) as sales,
 ROUND(SUM(o.sale_price - p.cost)) as profit,
@@ -41,12 +41,34 @@ FROM cte)
 WHERE rank_per_month < 6
 ORDER BY date
 -- bai 5
-SELECT FORMAT_DATE('%Y-%m-%d', o.created_at) as date,
+SELECT FORMAT_DATE('%Y-%m-%d', o.delivered_at) as date,
 p.category, ROUND(SUM(o.sale_price)) as revenue
 FROM bigquery-public-data.thelook_ecommerce.order_items as o
 INNER JOIN bigquery-public-data.thelook_ecommerce.products as p ON o.product_id = p.id
-WHERE FORMAT_DATE('%Y-%m-%d', o.created_at) BETWEEN '2022-04-15' AND '2022-07-15' AND o.status = 'Complete'
-GROUP BY FORMAT_DATE('%Y-%m-%d', o.created_at), p.category
+WHERE FORMAT_DATE('%Y-%m-%d', o.delivered_at) BETWEEN '2022-04-15' AND '2022-07-15' AND o.status = 'Complete'
+GROUP BY FORMAT_DATE('%Y-%m-%d', o.delivered_at), p.category
 ORDER BY 1
 -- Phan 2  
+WITH cte as (SELECT FORMAT_DATE('%Y-%m', o1.delivered_at) as month, 
+FORMAT_DATE('%Y', o1.delivered_at) as year,
+SUM(o2.sale_price) as tpv,
+COUNT(o2.order_id) as tpo, 
+SUM(p.cost) as total_cost,
+FROM bigquery-public-data.thelook_ecommerce.orders as o1
+JOIN bigquery-public-data.thelook_ecommerce.order_items as o2 ON o1.order_id = o2.order_id
+JOIN bigquery-public-data.thelook_ecommerce.products as p ON o2.product_id = p.id
+WHERE o2.status = 'Complete'
+GROUP BY 1,2
+ORDER BY 1)
+
+CREATE VIEW vw_ecommerce_analyst AS
+SELECT *,
+ROUND((LEAD(tpv) OVER(ORDER BY month, year)  - tpv)/tpv, 3) || '%' as revenue_growth,
+ROUND((LEAD(tpo) OVER(ORDER BY month, year)  - tpo)/tpo, 3) || '%' as order_growth,
+ROUND(tpv-total_cost,2) as total_profit,
+ROUND(ROUND(tpv-total_cost,2)/total_cost, 2) || '%' as profit_to_cost_ratio 
+FROM cte
+ORDER BY month, year
+
+
 
